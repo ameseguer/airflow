@@ -1,3 +1,8 @@
+ssh-airflow
+ssh-airflow.pub
+airflow.cfg
+unittests.cfg
+logs/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
