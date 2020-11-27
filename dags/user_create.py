@@ -10,7 +10,6 @@ import airflow
 import logging
 from airflow import DAG
 from airflow.operators.http_operator import SimpleHttpOperator
-from operators.status_http_operator import StatusHttpOperator
 from airflow.operators.email_operator import EmailOperator
 from airflow.sensors.http_sensor import HttpSensor
 from airflow.models import Variable
