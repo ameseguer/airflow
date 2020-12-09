@@ -39,7 +39,7 @@ eaa_user="{{ dag_run.conf['eaa_user'] }}"
 # ClassMarker Data
 cm_api_key=Variable.get('CM_API_KEY')
 cm_api_sec=Variable.get('CM_API_SECRET')
-cm_list=Variable.get('CM_LIST_EAA')
+cm_list=Variable.get('CM_LIST_ETP')
 timestamp=int(datetime.datetime.utcnow().timestamp())
 concat=f'{cm_api_key}{cm_api_sec}{timestamp}'
 signature=hashlib.md5(concat.encode()).hexdigest()
@@ -115,8 +115,8 @@ cm_enrollment = SimpleHttpOperator(
 email_failure = EmailOperator(
         task_id='email_failure',
         to=f'amesegue@akamai.com,{username}@akamaipartnertraining.com,partnertraining@akamai.com',
-        subject=f'EAA certification',
-        html_content=f'We regret to inform you that you have not passed your attempt of the Practical component of the Akamai Advanced Partner EAA Certification. \
+        subject=f'ETP certification',
+        html_content=f'We regret to inform you that you have not passed your attempt of the Practical component of the Akamai Advanced Partner ETP Certification. \
             Take your time, study the areas you had trouble with, and when you are ready, please attempt again!',
         trigger_rule='one_failed',
         dag=dag
@@ -125,8 +125,8 @@ email_failure = EmailOperator(
 email_success = EmailOperator(
         task_id='email_success',
         to=f'amesegue@akamai.com,{username}@akamaipartnertraining.com,partnertraining@akamai.com',
-        subject=f'Certification approval: {username} has completed EAA certification',
-        html_content=f'<h4>Congratulations!<h4>  You have successfully passed the practical examination component of the Akamai Advanced Partner EAA Certification.\
+        subject=f'Certification approval: {username} has completed ETP certification',
+        html_content=f'<h4>Congratulations!<h4>  You have successfully passed the practical examination component of the Akamai Advanced Partner ETP Certification.\
               In order to complete your certification, you must also successfully complete the accompanying multiple choice exam component.\
               Please go to your preferred link below and use your username {username} as access code. Enter your own email address when prompted for it.\
             <ul>\
