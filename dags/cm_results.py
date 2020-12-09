@@ -77,7 +77,7 @@ def python_parse_results(**kwargs):
         return 'no_results'
     if(results['next_finished_after_timestamp']):
         Variable.set("CM_RESULTS_TIMESTAMP", results['next_finished_after_timestamp'])
-    sql_links='INSERT IGNORE INTO links('
+    sql_links='INSERT IGNORE INTO classmarker.links('
     value_keys=False
     first=True
     for res in results['links']:
@@ -93,7 +93,7 @@ def python_parse_results(**kwargs):
         sql_links+=sequelize(link.values())
     sql_links+=';'
     
-    sql_tests='INSERT IGNORE INTO tests('
+    sql_tests='INSERT IGNORE INTO classmarker.tests('
     value_keys=False
     first=True
     for res in results['tests']:
@@ -109,7 +109,7 @@ def python_parse_results(**kwargs):
         sql_tests+=sequelize(test.values())
     sql_tests+=';'
 
-    sql_results='INSERT IGNORE INTO results('
+    sql_results='INSERT IGNORE INTO classmarker.results('
     value_keys=False
     first=True
     for res in results['results']:
