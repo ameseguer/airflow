@@ -1,3 +1,7 @@
+webserver_config.py
+unittests.cfg
+airflow.db
+airflow-webserver.pid
 ssh-airflow
 ssh-airflow.pub
 airflow.cfg
