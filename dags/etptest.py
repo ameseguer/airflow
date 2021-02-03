@@ -56,8 +56,7 @@ test_amazon = SSHOperator(
     command=f'pytest-3 /home/airflow/tests/etp/{etp_user}/test_amazon.py',
     ssh_conn_id='selenium',
     dag=dag,
-    retries=0,
-    do_xcom_push=True
+    retries=0
     )
 
 test_eicar = SSHOperator(
@@ -65,8 +64,7 @@ test_eicar = SSHOperator(
     command=f'pytest-3 /home/airflow/tests/etp/{etp_user}/test_eicar.py',
     ssh_conn_id='selenium',
     dag=dag,
-    retries=0,
-    do_xcom_push=True
+    retries=0
     )
 
 test_lingerie = SSHOperator(
@@ -74,8 +72,7 @@ test_lingerie = SSHOperator(
     command=f'pytest-3 /home/airflow/tests/etp/{etp_user}/test_lingerie.py',
     ssh_conn_id='selenium',
     dag=dag,
-    retries=0,
-    do_xcom_push=True
+    retries=0
     )
 
 test_proxy1 = SSHOperator(
@@ -83,8 +80,7 @@ test_proxy1 = SSHOperator(
     command=f'pytest-3 /home/airflow/tests/etp/{etp_user}/test_proxy1.py',
     ssh_conn_id='selenium',
     dag=dag,
-    retries=0,
-    do_xcom_push=True
+    retries=0
     )
 
 test_proxy2 = SSHOperator(
@@ -92,8 +88,7 @@ test_proxy2 = SSHOperator(
     command=f'pytest-3 /home/airflow/tests/etp/{etp_user}/test_proxy2.py',
     ssh_conn_id='selenium',
     dag=dag,
-    retries=0,
-    do_xcom_push=True
+    retries=0
     )
 
 test_reddit = SSHOperator(
@@ -101,8 +96,7 @@ test_reddit = SSHOperator(
     command=f'pytest-3 /home/airflow/tests/etp/{etp_user}/test_reddit.py',
     ssh_conn_id='selenium',
     dag=dag,
-    retries=0,
-    do_xcom_push=True
+    retries=0
     )
 
 test_social = SSHOperator(
@@ -110,8 +104,7 @@ test_social = SSHOperator(
     command=f'pytest-3 /home/airflow/tests/etp/{etp_user}/test_social.py',
     ssh_conn_id='selenium',
     dag=dag,
-    retries=0,
-    do_xcom_push=True
+    retries=0
     )   
 
 test_weapons = SSHOperator(
@@ -119,8 +112,7 @@ test_weapons = SSHOperator(
     command=f'pytest-3 /home/airflow/tests/etp/{etp_user}/test_weapons.py',
     ssh_conn_id='selenium',
     dag=dag,
-    retries=0,
-    do_xcom_push=True
+    retries=0
     )
 
 cm_enrollment = SimpleHttpOperator(
@@ -131,7 +123,6 @@ cm_enrollment = SimpleHttpOperator(
     data=json.dumps(post_body),
     headers={"Content-Type": "application/json"},
     response_check=lambda response: True if ('status' in response.json() and response.json()['status']=='ok') else False,
-    xcom_push=True,
     log_response=True,
     dag=dag)
 

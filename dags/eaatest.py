@@ -60,7 +60,6 @@ test_finance = SSHOperator(
     ssh_conn_id='selenium',
     dag=dag,
     retries=0,
-    do_xcom_push=True
     )
 
 test_intranet = SSHOperator(
@@ -69,7 +68,6 @@ test_intranet = SSHOperator(
     ssh_conn_id='selenium',
     dag=dag,
     retries=0,
-    do_xcom_push=True
     )
 
 test_no_finance = SSHOperator(
@@ -78,7 +76,6 @@ test_no_finance = SSHOperator(
     ssh_conn_id='selenium',
     dag=dag,
     retries=0,
-    do_xcom_push=True
     )
 
 test_no_intranet = SSHOperator(
@@ -87,7 +84,6 @@ test_no_intranet = SSHOperator(
     ssh_conn_id='selenium',
     dag=dag,
     retries=0,
-    do_xcom_push=True
     )
 
 test_status = SSHOperator(
@@ -96,7 +92,6 @@ test_status = SSHOperator(
     ssh_conn_id='selenium',
     dag=dag,
     retries=0,
-    do_xcom_push=True
     )
 
 cm_enrollment = SimpleHttpOperator(
@@ -107,7 +102,6 @@ cm_enrollment = SimpleHttpOperator(
     data=json.dumps(post_body),
     headers={"Content-Type": "application/json"},
     response_check=lambda response: True if ('status' in response.json() and response.json()['status']=='ok') else False,
-    xcom_push=True,
     log_response=True,
     dag=dag)
 
