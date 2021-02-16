@@ -1,4 +1,5 @@
 import json
+import re
 from datetime import timedelta
 
 import airflow
@@ -8,7 +9,8 @@ from airflow.operators.http_operator import SimpleHttpOperator
 from airflow.operators.email_operator import EmailOperator
 from airflow.sensors.http_sensor import HttpSensor
 from airflow.models import Variable
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python_operator import PythonOperator,BranchPythonOperator
+from airflow.operators.dummy_operator import DummyOperator
 from airflow.utils.trigger_rule import TriggerRule
 
 
@@ -22,6 +24,7 @@ mail_passw=Variable.get('MAIL_ADMIN_PASS')
 domain=Variable.get('DOMAIN')
 prefix=Variable.get('USER_PREFIX')
 mail_to=Variable.get('MAIL_NOTIFY_TO')
+mail_create=Variable.get('MAIL_CREATE')
 
 
 default_args = {
@@ -55,7 +58,7 @@ kcData = {
 with DAG('user_create',
         schedule_interval=None, 
         default_args=default_args,
-        tags=['validation','partners'],
+        tags=['user_create','validation','keycloak', 'email'],
         catchup=False,
         user_defined_filters={'fromjson': lambda s: json.loads(s)}
         ) as dag:
@@ -90,8 +93,22 @@ with DAG('user_create',
         response_check=lambda response: True if len(response.content)>=0 else False,
         poke_interval=5,
         dag=dag)
+    
+    def aka_mail(**kwargs):
+        if mail_create == "False":
+            return 'do_nothing'
+        else:
+            return 'mail_createMbox'
 
-    mail_create=SimpleHttpOperator(
+    do_nothing = DummyOperator(task_id='do_nothing', dag=dag)
+
+    domain_check = BranchPythonOperator(
+        task_id='domain_check',
+        python_callable=aka_mail,
+        dag=dag
+        )
+
+    mail_createMbox=SimpleHttpOperator(
         http_conn_id='mailbox_connection',
         task_id='mail_createMbox',
         method='POST',
@@ -118,4 +135,5 @@ with DAG('user_create',
 
 sensor >> kc_token >> kc_createUser  >> email_notify >> email_notify_user
 
-[kc_createUser,mail_create] >> email_notify
+
+domain_check >> [mail_createMbox, do_nothing]

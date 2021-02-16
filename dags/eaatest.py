@@ -49,7 +49,7 @@ post_body.append(username)
 dag = DAG('eaa_test',
         schedule_interval=None, 
         default_args=default_args,
-        tags=['classmarker'],
+        tags=['eaa_test','validation', 'classmarker', 'eaa'],
         catchup=False,
         user_defined_filters={'fromjson': lambda s: json.loads(s)}
         )

@@ -7,7 +7,9 @@ from airflow.operators.http_operator import SimpleHttpOperator
 from airflow.operators.email_operator import EmailOperator
 from airflow.sensors.http_sensor import HttpSensor
 from airflow.models import Variable
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python_operator import PythonOperator,BranchPythonOperator
+from airflow.operators.dummy_operator import DummyOperator
+
 
 kc_secret=Variable.get('KEYCLOAK_SECRET')
 kc_realm=Variable.get('KEYCLOAK_REALM')
@@ -20,6 +22,7 @@ domain=Variable.get('DOMAIN')
 prefix=Variable.get('USER_PREFIX')
 
 mail_to=Variable.get('MAIL_NOTIFY_TO')
+mail_create=Variable.get('MAIL_CREATE')
 
 default_args = {
     'owner': 'airflow',
@@ -36,7 +39,7 @@ default_args = {
 with DAG('user_delete',
         schedule_interval=None, 
         default_args=default_args,
-        tags=['validation','partners'],
+        tags=['user_delete','validation','keycloak', 'email'],
         catchup=False,
         user_defined_filters={'fromjson': lambda s: json.loads(s)}
         ) as dag:
@@ -87,6 +90,20 @@ with DAG('user_delete',
         headers={'Authorization':'Bearer '+'{{(task_instance.xcom_pull(key="return_value", task_ids="kc_token")| fromjson)["access_token"] }}' },
         response_check=lambda response: True if  response.status_code < 400 else False,
         dag=dag)
+        
+    def aka_mail(**kwargs):
+        if mail_create == "False":
+            return 'do_nothing'
+        else:
+            return 'mail_delete'
+
+    do_nothing = DummyOperator(task_id='do_nothing', dag=dag)
+
+    domain_check = BranchPythonOperator(
+        task_id='domain_check',
+        python_callable=aka_mail,
+        dag=dag
+        )
 
     mail_delete=SimpleHttpOperator(
         http_conn_id='mailbox_connection',
@@ -106,7 +123,6 @@ with DAG('user_delete',
             dag=dag
     )
 
-    sensor >> kc_token >> kc_get_user_data >> kc_delete_user
+    sensor >> kc_token >> kc_get_user_data >> kc_delete_user >> email_notify
 
-    [kc_delete_user,mail_delete] >> email_notify
-
+    domain_check >> [mail_delete, do_nothing]

@@ -1,9 +1,14 @@
+.ash_history
+.ash_history/*
 webserver_config.py
 unittests.cfg
 airflow.db
 airflow-webserver.pid
 ssh-airflow
 ssh-airflow.pub
+./ssh/*
+.ssh
+shell/*swp
 airflow.cfg
 unittests.cfg
 logs/

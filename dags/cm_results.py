@@ -33,7 +33,7 @@ with DAG(
     'cm_results', 
     default_args=default_args,
     schedule_interval='0 */6 * * *',
-    tags=['ClassMarker','partners']
+    tags=['cm_results','classmarker','reports']
 ) as dag:
 
     time_range=int(Variable.get('CM_RESULTS_TIMESTAMP'))

@@ -47,7 +47,7 @@ post_body.append(username)
 dag = DAG('etp_test',
         schedule_interval=None, 
         default_args=default_args,
-        tags=['classmarker'],
+        tags=['etp_test','classmarker', 'validation', 'etp'],
         catchup=False,
         )
 
