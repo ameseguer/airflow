@@ -118,22 +118,22 @@ with DAG('user_create',
         response_check=lambda response: True if  (response.status_code < 400 or response.status_code == 409)  else False,
         dag=dag)
 
-    email_notify = EmailOperator(
-            task_id='email_notify',
-            to=mail_to,
-            subject=f'Airflow: {prefix}{code} created',
-            html_content=f'User:<h3> {prefix}{code}</h3><br/> password: <h3>password{code}</h3>',
-            dag=dag
-    )
-    email_notify_user = EmailOperator(
-            task_id='email_notify_user',
-            to=rEmail,
-            subject=f'Welcome to {labName}',
-            html_content=f'You have been enrolled into {labName} with the following credentials<br/>User:<h3> {prefix}{code}</h3><br/> password: <h3>password{code}</h3>',
-            dag=dag
-    )
+     email_notify = EmailOperator(
+             task_id='email_notify',
+             to=mail_to,
+             subject=f'Airflow: {prefix}{code} created',
+             html_content=f'User:<h3> {prefix}{code}</h3><br/> password: <h3>password{code}</h3>',
+             dag=dag
+     )
+     email_notify_user = EmailOperator(
+             task_id='email_notify_user',
+             to=rEmail,
+             subject=f'Welcome to {labName}',
+             html_content=f'You have been enrolled into {labName} with the following credentials<br/>User:<h3> {prefix}{code}</h3><br/> password: <h3>password{code}</h3>',
+             dag=dag
+     )
 
-sensor >> kc_token >> kc_createUser  >> email_notify >> email_notify_user
+sensor >> kc_token >> kc_createUser  #>> email_notify >> email_notify_user
 
 
 domain_check >> [mail_createMbox, do_nothing]
