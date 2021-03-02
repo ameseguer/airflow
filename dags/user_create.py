@@ -133,7 +133,7 @@ with DAG('user_create',
              dag=dag
      )
 
-sensor >> kc_token >> kc_createUser  #>> email_notify >> email_notify_user
+sensor >> kc_token >> kc_createUser  >> email_notify >> email_notify_user
 
 
 domain_check >> [mail_createMbox, do_nothing]
