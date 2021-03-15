@@ -146,6 +146,10 @@ email_success = EmailOperator(
               Please go to your preferred link below and use your username {username} as access code. Enter your own email address when prompted for it.\
             <ul>\
                 <li><a  target="_blank" href="https://www.classmarker.com/online-test/start/?quiz=fqf5fa552808ec52">English</a></li>\
+                <li><a  target="_blank" href="https://www.classmarker.com/online-test/start/?quiz=fqa5fce3db1c15f2"></a></li>\
+                <li><a  target="_blank" href="https://www.classmarker.com/online-test/start/?quiz=gka5fce3e162f22e">Japanese</a></li>\
+                <li><a  target="_blank" href="https://www.classmarker.com/online-test/start/?quiz=etj5fce3e3fb9525">Korean</a></li>\
+                <li><a  target="_blank" href="https://www.classmarker.com/online-test/start/?quiz=khn5fce3e66e3d2b">Spanish</a></li>\
             <ul>\
             <h4>If you require any assistance, please contact <a href="mailto:partnertraining@akamai.com">partnertraining@akamai.com</a> for help.</h4>',
         dag=dag
