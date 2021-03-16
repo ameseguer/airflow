@@ -24,6 +24,7 @@ mail_passw=Variable.get('MAIL_ADMIN_PASS')
 domain=Variable.get('DOMAIN')
 prefix=Variable.get('USER_PREFIX')
 mail_to=Variable.get('MAIL_NOTIFY_TO')
+mail_err=Variable.get('MAIL_ERR')
 mail_create=Variable.get('MAIL_CREATE')
 
 
@@ -32,7 +33,7 @@ default_args = {
     'depends_on_past': False,
     'catchup':False,
     'start_date':airflow.utils.dates.days_ago(2),
-    'email': [mail_to],
+    'email': [mail_err],
     'email_on_failure': True,
     'email_on_retry': False,
     'retries': 1,
@@ -122,14 +123,16 @@ with DAG('user_create',
              task_id='email_notify',
              to=mail_to,
              subject=f'Airflow: {prefix}{code} created',
-             html_content=f'User:<h3> {prefix}{code}</h3><br/> password: <h3>password{code}</h3>',
+             html_content=f'Student: <h3>{rEmail}</h3><br/>User:<h3> {prefix}{code}</h3><br/> password: <h3>password{code}</h3>',
+             trigger_rule='none_skipped',
              dag=dag
      )
     email_notify_user = EmailOperator(
              task_id='email_notify_user',
-             to=rEmail,
+             to=f'{rEmail},{mail_to}',
              subject=f'Welcome to {labName}',
              html_content=f'You have been enrolled into {labName} with the following credentials<br/>User:<h3> {prefix}{code}</h3><br/> password: <h3>password{code}</h3>',
+             trigger_rule='none_skipped',
              dag=dag
      )
 
