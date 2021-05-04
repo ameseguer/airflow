@@ -68,7 +68,7 @@ with DAG('user_create',
         http_conn_id='kc_connection',
         task_id='kc_token',
         method='POST',
-        endpoint='/auth/realms/master/protocol/openid-connect/token',
+        endpoint=f'/auth/realms/master/protocol/openid-connect/token',
         data='client_id='+kc_client+'&grant_type='+'client_credentials'+'&client_secret='+kc_secret,
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         response_check=lambda response: True if 'access_token' in response.json() else False,
@@ -82,7 +82,7 @@ with DAG('user_create',
         endpoint=f'/auth/admin/realms/{kc_realm}/users',
         data=json.dumps(kcData),
         headers={'Content-Type': 'application/json', 'Authorization':'Bearer '+'{{ (task_instance.xcom_pull(key="return_value", task_ids="kc_token")| fromjson)["access_token"] }}' },
-        response_check=lambda response: True if  response.status_code < 400 else False,
+        response_check=lambda response: True if  ( response.status_code < 400 or response.status_code == 409 ) else False,
         log_response= True,
         dag=dag)
 
@@ -116,7 +116,7 @@ with DAG('user_create',
         endpoint='/admin/mail/users/add',
         data=f'email={prefix}{code}@{domain}&password=password{code}',
         headers={'Content-Type':'application/x-www-form-urlencoded'},
-        response_check=lambda response: True if  (response.status_code < 400 or response.status_code == 409)  else False,
+        response_check=lambda response: True if  (response == "mail user added" or response == "User already exists.")  else False,
         dag=dag)
 
     email_notify = EmailOperator(
