@@ -45,6 +45,6 @@ while read line ; do
 done &&
 
 if [ -f "$LDIFF" ] ; then 
-    ldapmodify   -h "$SERVER"  -D "$BIND_DN" -w"$PASSW" < $LDIFF >> /dev/null &&
+    ldapmodify   -h "$SERVER"  -D "$BIND_DN" -w"$PASSW" < $LDIFF >> /dev/null;
     rm "$LDIFF"
 fi
