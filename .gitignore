@@ -1,3 +1,5 @@
+.viminfo
+.gitconfig
 .ash_history
 .ash_history/*
 webserver_config.py
