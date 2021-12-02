@@ -53,6 +53,8 @@ notifyEmail = "{{dag_run.conf['notifyEmail']}}"
 
 post_body = []
 post_body.append(username)
+post_body_id = []
+post_body_id.append(attemptId)
 
 with DAG('lvs_endlab',
          schedule_interval=None,
@@ -69,6 +71,18 @@ with DAG('lvs_endlab',
         method='POST',
         endpoint=f'/v1/accesslists/{cm_list}.json?api_key={cm_api_key}&signature={signature}&timestamp={timestamp}',
         data=json.dumps(post_body),
+        headers={"Content-Type": "application/json"},
+        response_check=lambda response: True if (
+            'status' in response.json() and response.json()['status'] == 'ok') else False,
+        log_response=True,
+        dag=dag)
+
+    cm_enroll_id = SimpleHttpOperator(
+        http_conn_id='classmarker_api',
+        task_id='cm_enroll_id',
+        method='POST',
+        endpoint=f'/v1/accesslists/{cm_list}.json?api_key={cm_api_key}&signature={signature}&timestamp={timestamp}',
+        data=json.dumps(post_body_id),
         headers={"Content-Type": "application/json"},
         response_check=lambda response: True if (
             'status' in response.json() and response.json()['status'] == 'ok') else False,
@@ -117,5 +131,5 @@ with DAG('lvs_endlab',
         trigger_rule='none_failed',
         dag=dag)
 
-    branch_check >> [cm_enroll,
+    branch_check >> [cm_enroll>>cm_enroll_id,
                      do_nothing] >> email_notify >> email_notify_user >> mysql_mark_notified
