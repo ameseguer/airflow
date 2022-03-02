@@ -31,8 +31,6 @@ default_args = {
     'retry_delay': timedelta(minutes=1),
 }
 
-code = "{{ dag_run.conf['code'] }}"
-resource = "{{ dag_run.conf['resource'] }}"
 
 swarm_auth = {
     'Username': f'{swarm_user}',
@@ -59,44 +57,51 @@ with DAG('swarm_deprovision',
         log_response=True,
         dag=dag)
 
-    swarm_search = SimpleHttpOperator(
-        http_conn_id='docker_swarm',
-        task_id='swarm_search',
-        method='GET',
-        endpoint='/api/stacks',
-        headers={'Authorization': 'Bearer ' +
-                 '{{ (task_instance.xcom_pull(key="return_value", task_ids="swarm_token")| fromjson)["jwt"] }}'},
-        log_response=True,
-        dag=dag)
+    # swarm_search = SimpleHttpOperator(
+    #     http_conn_id='docker_swarm',
+    #     task_id='swarm_search',
+    #     method='GET',
+    #     endpoint='/api/stacks',
+    #     headers={'Authorization': 'Bearer ' +
+    #              '{{ (task_instance.xcom_pull(key="return_value", task_ids="swarm_token")| fromjson)["jwt"] }}'},
+    #     log_response=True,
+    #     dag=dag)
 
-    def python_find_stack(**context):
-        json_raw = context['ti'].xcom_pull(task_ids='swarm_search')
-        json_result = json.loads(json_raw)
+    # def python_find_stack(**context):
+    #     json_raw = context['ti'].xcom_pull(task_ids='swarm_search')
+    #     json_result = json.loads(json_raw)
 
-        resource = context['dag_run'].conf.get('resource')
-        code = context['dag_run'].conf.get('code')
-        targetName = f'{resource}-{code}'
+    #     resource = context['dag_run'].conf.get('resource')
+    #     code = context['dag_run'].conf.get('code')
+    #     targetName = f'{resource}-{code}'
 
-        for stack in json_result:
-            if stack['Name'] == targetName:
-                print(stack)
-                return stack['Id']
-        return "null"
+    #     for stack in json_result:
+    #         if stack['Name'] == targetName:
+    #             print(stack)
+    #             return stack['Id']
+    #     return "null"
 
-    find_stack = PythonOperator(
-        task_id='find_stack',
-        python_callable=python_find_stack,
-        dag=dag)
+    # find_stack = PythonOperator(
+    #     task_id='find_stack',
+    #     python_callable=python_find_stack,
+    #     dag=dag)
 
     swarm_delete = SimpleHttpOperator(
         http_conn_id='docker_swarm',
         task_id='swarm_delete',
         method='DELETE',
-        endpoint='/api/stacks/{{task_instance.xcom_pull(key="return_value", task_ids="find_stack"}}',
+        endpoint='/api/stacks/{{dag_run.conf["providerId"] }}',
         headers={'Authorization': 'Bearer ' +
                  '{{ (task_instance.xcom_pull(key="return_value", task_ids="find_stack")| fromjson)["jwt"] }}'},
         log_response=True,
         dag=dag)
 
+    mysql_mark_deprovisioned = MySqlOperator(
+        sql="""UPDATE `Assets` SET `deprovisioned` = '1' ,`procesing`='0' WHERE `Assets`.`id` = '{{ dag_run.conf["assetId"] }}';""",
+        mysql_conn_id='validation_db',
+        task_id='mysql_mark_deprovisioned',
+        trigger_rule='all_done',
+        dag=dag)
 
-swarm_token >> swarm_search >> find_stack >> swarm_delete
+
+swarm_token >> swarm_delete >> mysql_mark_deprovisioned

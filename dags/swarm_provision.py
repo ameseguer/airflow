@@ -10,6 +10,7 @@ from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator, BranchPythonOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.utils.trigger_rule import TriggerRule
+from airflow.providers.mysql.operators.mysql import MySqlOperator
 
 
 swarm_user = Variable.get('SWARM_USER')
@@ -27,12 +28,13 @@ default_args = {
     'email': [mail_err],
     'email_on_failure': True,
     'email_on_retry': False,
-    'retries': 1,
+    'retries': 0,
     'retry_delay': timedelta(minutes=1),
 }
 
 code = "{{ dag_run.conf['code'] }}"
 resource = "{{ dag_run.conf['resource'] }}"
+asset_id = '{{ dag_run.conf["assetId"] }}'
 
 swarm_data = {
     'Name': f'{resource}-{code}',
@@ -86,5 +88,16 @@ with DAG('swarm_provision',
         log_response=True,
         dag=dag)
 
+    mysql_mark_provisioned = MySqlOperator(
+        sql="""UPDATE `Assets` SET `provisioned` = '1' ,`procesing`='0', `providerId`='{{(task_instance.xcom_pull(key="return_value", task_ids="swarm_create")| fromjson)["Id"] }}' WHERE `Assets`.`id` = '{{ dag_run.conf["assetId"] }}';""",
+        mysql_conn_id='validation_db',
+        task_id='mysql_mark_provisioned',
+        params={
+            "id": asset_id,
+            "providerId": '{{(task_instance.xcom_pull(key="return_value", task_ids="swarm_create")| fromjson)["Id"] }}'
+        },
+        trigger_rule='all_done',
+        dag=dag)
 
-swarm_token >> swarm_create
+
+swarm_token >> swarm_create >> mysql_mark_provisioned
