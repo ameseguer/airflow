@@ -193,6 +193,7 @@ with DAG('user_create',
         html_content=f'Student: <h3>{realEmail}</h3><br/>User:<h3> {username}</h3><br/> password: <h3>{password}</h3>',
         trigger_rule='none_skipped',
         dag=dag
+
     )
     email_notify_user = EmailOperator(
         task_id='email_notify_user',
@@ -208,4 +209,3 @@ sensor >> kc_token >> kc_checkUser >> kc_userExists >> [
 kc_createUser >> email_notify >> email_notify_user,
 domain_check >> [mail_createMbox, do_nothing]
 kc_createUser >> mail_createMbox
-mail_createMbox >> email_notify
