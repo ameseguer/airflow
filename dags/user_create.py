@@ -78,7 +78,7 @@ with DAG('user_create',
         http_conn_id='kc_connection',
         task_id='kc_token',
         method='POST',
-        endpoint=f'/auth/realms/master/protocol/openid-connect/token',
+        endpoint=f'/auth/realms/{kc_realm}/protocol/openid-connect/token',
         data='client_id='+kc_client+'&grant_type=' +
         'client_credentials'+'&client_secret='+kc_secret,
         headers={"Content-Type": "application/x-www-form-urlencoded"},
