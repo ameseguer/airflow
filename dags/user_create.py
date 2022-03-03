@@ -27,6 +27,8 @@ kc_client = Variable.get('KEYCLOAK_CLIENT')
 
 mail_admin = Variable.get('MAIL_ADMIN')
 mail_passw = Variable.get('MAIL_ADMIN_PASS')
+chimp_key = Variable.get('MAILCHIMP_KEY')
+chimp_template = Variable.get('MAILCHIMP_TEMPLATE_USER_CREATE')
 
 domain = Variable.get('DOMAIN')
 prefix = Variable.get('USER_PREFIX')
@@ -63,7 +65,43 @@ kcData = {
     'credentials': [{'type': 'password', 'value': f'{password}', 'temporary': False}],
     'attributes': {'realEmail':  f'{realEmail}'},
     'realmRoles': ['student']
-}
+    }
+
+chimpData ={
+    'key': chimp_key,
+    'template_name': chimp_template,
+    'template_content': [{}],
+    'message':{
+        "merge": True,
+        "global_merge_vars": [{
+                "name": "login",
+                "content": username
+        }, {
+                "name": "password",
+                "content": password
+        }, {
+                "name": "lab",
+                "content": labName
+        }, {
+                "name": "text:login",
+                "content": username
+        }, {
+                "name": "text:password",
+                "content": password
+        }, {
+                "name": "text:lab",
+                "content": labName
+        }],
+        "to": [{
+                "email": realEmail,
+                "type": "to"
+        }, {
+                "email": mail_to,
+                "type": "cc"
+        }, 
+        ]
+        }
+    }
 
 with DAG('user_create',
          schedule_interval=None,
@@ -195,14 +233,14 @@ with DAG('user_create',
         dag=dag
 
     )
-    email_notify_user = EmailOperator(
+    email_notify_user = SimpleHttpOperator(
+        http_conn_id='mailchimp_api',
         task_id='email_notify_user',
-        to=f'{realEmail},{mail_to}',
-        subject=f'Welcome to {labName}',
-        html_content=f'You have been enrolled into {labName} with the following credentials<br/>User:<h3> {username}</h3><br/> password: <h3>{password}</h3>',
-        trigger_rule='none_skipped',
-        dag=dag
-    )
+        method='POST',
+        endpoint='/api/1.0/messages/send-template',
+        data=json.dumps(chimpData),
+        headers={'Content-Type': 'application/json'},
+        dag=dag)
 
 sensor >> kc_token >> kc_checkUser >> kc_userExists >> [
     kc_createUser, do_nothing]
