@@ -95,13 +95,14 @@ chimpData ={
         "to": [{
                 "email": realEmail,
                 "type": "to"
-        }, {
-                "email": mail_to,
-                "type": "cc"
-        }, 
-        ]
+        }]
         }
     }
+#add the different admins
+mail_tos = mail_to.split(',')
+for mail_address in mail_tos:
+    chimpData['message']['to'].append({"email":mail_address,"type":"cc"})
+
 
 with DAG('user_create',
          schedule_interval=None,
