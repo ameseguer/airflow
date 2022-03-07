@@ -240,7 +240,7 @@ with DAG('user_create',
         task_id='email_notify',
         to=mail_to,
         subject=f'Airflow: {username} created',
-        html_content=f'Student: <h3>{realEmail}</h3><br/>User:<h3> {username}</h3><br/> password: <h3>{{(task_instance.xcom_pull(key="return_value", task_ids="pwd"))}}</h3>',
+        html_content=f'Student: <h3>{realEmail}</h3><br/>User:<h3> {username}</h3><br/> password: <h3>{password}</h3>',
         trigger_rule='none_skipped',
         dag=dag
 
