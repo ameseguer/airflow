@@ -14,11 +14,12 @@ from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator, BranchPythonOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.utils.trigger_rule import TriggerRule
+from airflow.decorators import  task
 
 
 def randomword(length):
-    letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for i in range(length))
+    x = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+    return x
 
 
 kc_secret = Variable.get('KEYCLOAK_SECRET')
@@ -52,7 +53,7 @@ default_args = {
 realEmail = "{{ dag_run.conf['realEmail'] }}"
 labName = "{{ dag_run.conf['labName'] }}"
 username = "{{ dag_run.conf['username'] }}"
-password = randomword(8)
+password = "{{ task_instance.xcom_pull(key='return_value', task_ids='pwd')}}"
 
 
 kcData = {
@@ -62,8 +63,8 @@ kcData = {
     'enabled': True,
     'username': username,
     'emailVerified': True,
-    'credentials': [{'type': 'password', 'value': f'{password}', 'temporary': False}],
-    'attributes': {'realEmail':  f'{realEmail}'},
+    'credentials': [{'type': 'password', 'value': password, 'temporary': False}],
+    'attributes': {'realEmail':  realEmail},
     'realmRoles': ['student']
     }
 
@@ -103,6 +104,10 @@ mail_tos = mail_to.split(',')
 for mail_address in mail_tos:
     chimpData['message']['to'].append({"email":mail_address,"type":"cc"})
 
+#@task(task_id="gen_passwd")
+def gen_pwd():
+    x = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+    return x
 
 with DAG('user_create',
          schedule_interval=None,
@@ -112,6 +117,12 @@ with DAG('user_create',
          user_defined_filters={'fromjson': lambda s: json.loads(s)},
          max_active_runs=1
          ) as dag:
+
+    pwd = PythonOperator(
+      task_id='pwd',
+      provide_context=True,
+      python_callable=gen_pwd,
+      dag=dag)
 
     kc_token = SimpleHttpOperator(
         http_conn_id='kc_connection',
@@ -220,7 +231,7 @@ with DAG('user_create',
         task_id='mail_createMbox',
         method='POST',
         endpoint='/admin/mail/users/add',
-        data=f'email={username}@{domain}&password={password}',
+        data=f"email={username}@{domain}&password={password}",
         headers={'Content-Type': 'application/x-www-form-urlencoded'},
         # response_check=lambda response: True if  (response == "mail user added" or response == "User already exists.")  else False,s
         dag=dag)
@@ -229,7 +240,7 @@ with DAG('user_create',
         task_id='email_notify',
         to=mail_to,
         subject=f'Airflow: {username} created',
-        html_content=f'Student: <h3>{realEmail}</h3><br/>User:<h3> {username}</h3><br/> password: <h3>{password}</h3>',
+        html_content=f'Student: <h3>{realEmail}</h3><br/>User:<h3> {username}</h3><br/> password: <h3>{{(task_instance.xcom_pull(key="return_value", task_ids="pwd"))}}</h3>',
         trigger_rule='none_skipped',
         dag=dag
 
@@ -245,6 +256,6 @@ with DAG('user_create',
 
 sensor >> kc_token >> kc_checkUser >> kc_userExists >> [
     kc_createUser, do_nothing]
-kc_createUser >> email_notify >> email_notify_user,
+pwd >>  kc_createUser >> email_notify >> email_notify_user,
 domain_check >> [mail_createMbox, do_nothing]
 kc_createUser >> mail_createMbox
