@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SERVER=openldap
+SERVER"ldap://=openldap"
 BASE_DN="$1"
 BIND_DN="$2"
 PASSW="$3"
@@ -9,11 +9,11 @@ LDIFF="/tmp/ldiff"
 
 
 # get students group
-LDAP_GROUP=$(ldapsearch -LLL  -h "$SERVER" -b "cn=students,ou=groups,dc=akamaipartnertraining,dc=com" \
+LDAP_GROUP=$(ldapsearch -LLL  -H "$SERVER" -b "cn=students,ou=groups,dc=akamaipartnertraining,dc=com" \
 -D "$BIND_DN" -w"$PASSW" gidNumber |sed '/^$/d'|tail -n1 |awk -F':' '{print $2}') &&
 
 # fetch all users with no posixAccount
-ldapsearch -LLL  -h "$SERVER" -b "$BASE_DN" \
+ldapsearch -LLL  -H "$SERVER" -b "$BASE_DN" \
 -D "$BIND_DN" -w"$PASSW"\
  '(&(!(objectClass=posixAccount))(objectClass=organizationalPerson))'  'dn' |\
  sed '/^$/d' |\
@@ -45,6 +45,6 @@ while read line ; do
 done &&
 
 if [ -f "$LDIFF" ] ; then 
-    ldapmodify   -h "$SERVER"  -D "$BIND_DN" -w"$PASSW" < $LDIFF >> /dev/null;
+    ldapmodify   -H "$SERVER"  -D "$BIND_DN" -w"$PASSW" < $LDIFF >> /dev/null;
     rm "$LDIFF"
 fi
