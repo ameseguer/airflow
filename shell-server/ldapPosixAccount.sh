@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SERVER"ldap://=openldap"
+SERVER="ldap://openldap"
 BASE_DN="$1"
 BIND_DN="$2"
 PASSW="$3"
