@@ -46,7 +46,7 @@ default_args = {
         "realEmail": "NA",
         "password": "NA",
         "username": "NA",
-        "firstName": "NA",
+        "firstName": "student",
         "lastName": "NA",
         "startDate": "NA",
         "endDate": "NA",
@@ -59,7 +59,8 @@ default_args = {
         "userzone": "NA",
         "dnsletter": "c",
         "dns1": "NA",
-        "dns2": "NA"
+        "dns2": "NA",
+        "createdBy": mail_err
     }
 }
 
@@ -125,14 +126,17 @@ chimpData ={
         "to": [{
                 "email": "{{params.realEmail}}",
                 "type": "to"
-        }]
+            },{
+                "email": "{{params.createdBy}}",
+                "type": "cc"
+            }]
         }
     }
 #add the different admins
 mail_tos = mail_to.split(',')
 for mail_address in mail_tos:
     chimpData['message']['to'].append({"email":mail_address,"type":"bcc"})
-
+mail_tos="{{params.createdBy}}"
 
 with DAG('lvs_enrollment_notify',
          schedule_interval=None,

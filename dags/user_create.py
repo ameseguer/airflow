@@ -48,6 +48,27 @@ default_args = {
     'email_on_retry': False,
     'retries': 1,
     'retry_delay': timedelta(minutes=1),
+    'params': {
+        "template":"s7partner",
+        "labName": "NA",
+        "realEmail": "NA",
+        "username": "NA",
+        "firstName": "student",
+        "lastName": "NA",
+        "startDate": "NA",
+        "endDate": "NA",
+        "labId": "NA",
+        "enroller": "NA",
+        "eaa_user": "NA",
+        "eaa_password": "NA",
+        "etp_user": "NA",
+        "etp_password": "NA",
+        "userzone": "NA",
+        "dnsletter": "c",
+        "dns1": "NA",
+        "dns2": "NA",
+        "createdBy": mail_err
+    }
 }
 
 realEmail = "{{ dag_run.conf['realEmail'] }}"
@@ -70,33 +91,70 @@ kcData = {
 
 chimpData ={
     'key': chimp_key,
-    'template_name': chimp_template,
+    'template_name': '{{params.template}}' ,
     'template_content': [{}],
     'message':{
         "merge": True,
+        "preserve_recipients": True,
         "global_merge_vars": [{
                 "name": "login",
-                "content": username
+                "content": "{{params.username}}"
         }, {
                 "name": "password",
-                "content": password
+                "content": password,
         }, {
                 "name": "lab",
-                "content": labName
+                "content": "{{params.labName}}"
         }, {
-                "name": "text:login",
-                "content": username
+                "name": "startdate",
+                "content": "{{params.startDate}}"
         }, {
-                "name": "text:password",
-                "content": password
+                "name": "enddate",
+                "content": "{{params.endDate}}"
         }, {
-                "name": "text:lab",
-                "content": labName
+                "name": "labid",
+                "content": "{{params.labId}}"
+        }, {
+                "name": "enroller",
+                "content": "{{params.enroller}}"
+        }, {
+                "name": "lastname",
+                "content": "{{params.lastName}}"
+        }, {
+                "name": "eaa_user",
+                "content": "{{params.eaa_user}}"
+        }, {
+                "name": "etp_user",
+                "content": "{{params.etp_user}}"
+        }, {
+                "name": "dns1",
+                "content": "{{params.dns1}}"
+        }, {
+                "name": "dns2",
+                "content": "{{params.dns2}}"
+        }, {
+                "name": "dnsletter",
+                "content": "{{params.dnsletter}}"
+        }, {
+                "name": "etp_password",
+                "content": "{{params.etp_password}}"
+        }, {
+                "name": "eaa_password",
+                "content": "{{params.eaa_password}}"
+        }, {
+                "name": "userzone",
+                "content": "{{params.userzone}}"
+        }, {
+                "name": "firstname",
+                "content": "{{params.firstName}}"
         }],
         "to": [{
-                "email": realEmail,
+                "email": "{{params.realEmail}}",
                 "type": "to"
-        }]
+            },{
+                "email": "{{params.createdBy}}",
+                "type": "cc"
+            }]
         }
     }
 #add the different admins
