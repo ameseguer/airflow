@@ -34,6 +34,9 @@ default_args = {
     'email_on_retry': False,
     'retries': 1,
     'retry_delay': timedelta(minutes=1),
+    'params': {
+        "username": "NA"
+    }
 }
 
 with DAG('user_delete',
@@ -80,7 +83,7 @@ with DAG('user_delete',
         task_id='kc_get_user_data',
         method='GET',
         endpoint=f'/auth/admin/realms/{kc_realm}/users',
-        data=f'username={username}',
+        data='username={{params.username}}',
         headers={'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': 'Bearer ' +
                  '{{(task_instance.xcom_pull(key="return_value", task_ids="kc_token")| fromjson)["access_token"] }}'},
         response_check=lambda response: True if response.status_code < 400 else False,
@@ -134,7 +137,7 @@ with DAG('user_delete',
         task_id='mail_delete',
         method='POST',
         endpoint='/admin/mail/users/remove',
-        data=f'email={username}@{domain}',
+        data='email={{params.username}}'+f'@{domain}',
         headers={'Content-Type': 'application/x-www-form-urlencoded'},
         response_check=lambda response: True if response.status_code < 400 else False,
         dag=dag)
@@ -142,8 +145,8 @@ with DAG('user_delete',
     email_notify = EmailOperator(
         task_id='email_notify',
         to=mail_to,
-        subject=f'Airflow: User {username} deleted',
-        html_content=f'<h3>User {username} has been deleted</h3>',
+        subject='Airflow: User {{params.username}} deleted',
+        html_content='<h3>User {{params.username}} has been deleted</h3>',
         dag=dag
     )
 

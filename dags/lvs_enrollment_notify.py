@@ -42,9 +42,9 @@ default_args = {
     'retry_delay': timedelta(minutes=1),
     'params': {
         "template":"startpartner",
-        "labName": "NA",
+        "labName": "Akamai Certification",
         "realEmail": "NA",
-        "password": "NA",
+        "password": "[NO CHANGE ... Keep using your current password]",
         "username": "NA",
         "firstName": "student",
         "lastName": "NA",

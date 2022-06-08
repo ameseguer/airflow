@@ -60,6 +60,7 @@ default_args = {
         "labId": "NA",
         "enroller": "NA",
         "eaa_user": "NA",
+        "enterprisenumber": "0",
         "eaa_password": "NA",
         "etp_user": "NA",
         "etp_password": "NA",
@@ -145,6 +146,9 @@ chimpData ={
                 "name": "userzone",
                 "content": "{{params.userzone}}"
         }, {
+                "name": "enterprisenumber",
+                "content": "{{params.enterprisenumber}}"
+        }, {
                 "name": "firstname",
                 "content": "{{params.firstName}}"
         }],
@@ -160,7 +164,7 @@ chimpData ={
 #add the different admins
 mail_tos = mail_to.split(',')
 for mail_address in mail_tos:
-    chimpData['message']['to'].append({"email":mail_address,"type":"cc"})
+    chimpData['message']['to'].append({"email":mail_address,"type":"bcc"})
 
 #@task(task_id="gen_passwd")
 def gen_pwd():
