@@ -68,25 +68,25 @@ default_args = {
         "dnsletter": "c",
         "dns1": "NA",
         "dns2": "NA",
+        "domain": domain,
         "createdBy": mail_err
     }
 }
 
 realEmail = "{{ dag_run.conf['realEmail'] }}"
 labName = "{{ dag_run.conf['labName'] }}"
-username = "{{ dag_run.conf['username'] }}"
 password = "{{ task_instance.xcom_pull(key='return_value', task_ids='pwd')}}"
 
 
 kcData = {
     'firstName': 'Student',
-    'lastName': username,
-    'email': f'{username}@{domain}',
+    'lastName': '{{params.username}}',
+    'email': '{{params.username}}@{{params.domain}}',
     'enabled': True,
-    'username': username,
+    'username': '{{params.username}}',
     'emailVerified': True,
     'credentials': [{'type': 'password', 'value': password, 'temporary': False}],
-    'attributes': {'realEmail':  realEmail},
+    'attributes': {'realEmail':  '{{params.realEmail}}'},
     'realmRoles': ['student']
     }
 
@@ -149,6 +149,9 @@ chimpData ={
                 "name": "enterprisenumber",
                 "content": "{{params.enterprisenumber}}"
         }, {
+                "name": "domain",
+                "content": "{{params.domain}}"
+        }, {
                 "name": "firstname",
                 "content": "{{params.firstName}}"
         }],
@@ -202,7 +205,7 @@ with DAG('user_create',
         http_conn_id='kc_connection',
         task_id='kc_checkUser',
         method='GET',
-        endpoint=f'/auth/admin/realms/{kc_realm}/users?username={username}',
+        endpoint=f'/auth/admin/realms/{kc_realm}/users?username={{params.username}}',
         headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' +
                  '{{ (task_instance.xcom_pull(key="return_value", task_ids="kc_token")| fromjson)["access_token"] }}'},
         response_check=lambda response: True if (
@@ -293,7 +296,7 @@ with DAG('user_create',
         task_id='mail_createMbox',
         method='POST',
         endpoint='/admin/mail/users/add',
-        data=f"email={username}@{domain}&password={password}",
+        data="email={{params.username}}@{{params.domain}}&password="+password,
         headers={'Content-Type': 'application/x-www-form-urlencoded'},
         # response_check=lambda response: True if  (response == "mail user added" or response == "User already exists.")  else False,s
         dag=dag)
@@ -301,8 +304,8 @@ with DAG('user_create',
     email_notify = EmailOperator(
         task_id='email_notify',
         to=mail_to,
-        subject=f'Airflow: {username} created',
-        html_content=f'Student: <h3>{realEmail}</h3><br/>User:<h3> {username}</h3><br/> password: <h3>{password}</h3>',
+        subject='Airflow: {{params.username}} created',
+        html_content='Student: <h3>{{params.realEmail}}</h3><br/>User:<h3> {{params.username}}</h3><br/> password: <h3>'+password+'</h3>',
         trigger_rule='none_skipped',
         dag=dag
 
