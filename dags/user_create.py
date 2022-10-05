@@ -102,7 +102,7 @@ chimpData ={
                 "content": "{{params.username}}"
         }, {
                 "name": "password",
-                "content": password,
+                "content": password if password is not None else "[[No change...use your current password]]",
         }, {
                 "name": "lab",
                 "content": "{{params.labName}}"
@@ -255,7 +255,7 @@ with DAG('user_create',
 
     def aka_mail(**kwargs):
         if mail_create == "False":
-            return 'do_nothing'
+            return 'email_notify_user'
         else:
             return 'mail_createMbox'
 
@@ -301,15 +301,6 @@ with DAG('user_create',
         # response_check=lambda response: True if  (response == "mail user added" or response == "User already exists.")  else False,s
         dag=dag)
 
-    email_notify = EmailOperator(
-        task_id='email_notify',
-        to=mail_to,
-        subject='Airflow: {{params.username}} created',
-        html_content='Student: <h3>{{params.realEmail}}</h3><br/>User:<h3> {{params.username}}</h3><br/> password: <h3>'+password+'</h3>',
-        trigger_rule='none_skipped',
-        dag=dag
-
-    )
     email_notify_user = SimpleHttpOperator(
         http_conn_id='mailchimp_api',
         task_id='email_notify_user',
@@ -317,10 +308,11 @@ with DAG('user_create',
         endpoint='/api/1.0/messages/send-template',
         data=json.dumps(chimpData),
         headers={'Content-Type': 'application/json'},
+        trigger_rule='all_done',
         dag=dag)
 
 sensor >> kc_token >> kc_checkUser >> kc_userExists >> [
-    kc_createUser, do_nothing]
-pwd >>  kc_createUser >> email_notify >> email_notify_user,
+    pwd, email_notify_user]
+pwd >>  kc_createUser >>  email_notify_user,
 domain_check >> [mail_createMbox, do_nothing]
-kc_createUser >> mail_createMbox
+kc_createUser >> domain_check
