@@ -218,7 +218,7 @@ with DAG('user_create',
         json_xcom = json.loads(xcom_value)
 
         if len(json_xcom) == 0:
-            return "kc_createUser"
+            return "pwd"
         else:
             return "do_nothing"
 
