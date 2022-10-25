@@ -22,6 +22,7 @@ lvs_script = '{{ dag_run.conf["script"] }}'
 lvs_val_score = '{{ dag_run.conf["score"] }}'
 lvs_eaa_user = '{{ dag_run.conf["eaa_user"] }}'
 lvs_etp_user = '{{ dag_run.conf["etp_user"] }}'
+lvs_ent_user = '{{ dag_run.conf["enterprisenumber"] }}'
 
 default_args = {
     'owner': 'airflow',
@@ -92,14 +93,14 @@ with DAG('lvs_validation',
     )
     eaa_test = SSHOperator(
         task_id='eaa_test',
-        command=f'pytest-3 /home/airflow/tests/eaa/{lvs_eaa_user}/{lvs_script}',
+        command=f'pytest-3 /home/airflow/tests/eaa/user{lvs_ent_user}/{lvs_script}',
         ssh_conn_id='selenium',
         dag=dag,
         retries=2,
     )
     etp_test = SSHOperator(
         task_id='etp_test',
-        command=f'pytest-3 /home/airflow/tests/etp/{lvs_etp_user}/{lvs_script}',
+        command=f'pytest-3 /home/airflow/tests/etp/user{lvs_ent_user}/{lvs_script}',
         ssh_conn_id='selenium',
         dag=dag,
         retries=2,

@@ -35,7 +35,8 @@ default_args = {
     'retries': 1,
     'retry_delay': timedelta(minutes=1),
     'params': {
-        "username": "NA"
+        "username": "NA",
+        "domain": domain
     }
 }
 
@@ -137,7 +138,7 @@ with DAG('user_delete',
         task_id='mail_delete',
         method='POST',
         endpoint='/admin/mail/users/remove',
-        data='email={{params.username}}'+f'@{domain}',
+        data='email={{(task_instance.xcom_pull(key="return_value", task_ids="kc_get_user_data")| fromjson)[0]["email"] }}',
         headers={'Content-Type': 'application/x-www-form-urlencoded'},
         response_check=lambda response: True if response.status_code < 400 else False,
         dag=dag)

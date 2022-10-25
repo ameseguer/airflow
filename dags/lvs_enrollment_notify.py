@@ -60,6 +60,7 @@ default_args = {
         "dnsletter": "c",
         "dns1": "NA",
         "dns2": "NA",
+        "enterprisenumber":"00",
         "createdBy": mail_err
     }
 }
@@ -119,6 +120,9 @@ chimpData ={
         }, {
                 "name": "userzone",
                 "content": "{{params.userzone}}"
+        }, {
+                "name": "enterprisenumber",
+                "content": "{{params.enterprisenumber}}"
         }, {
                 "name": "firstname",
                 "content": "{{params.firstName}}"
