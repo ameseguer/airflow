@@ -46,8 +46,8 @@ default_args = {
     'email': [mail_err],
     'email_on_failure': True,
     'email_on_retry': False,
-    'retries': 1,
-    'retry_delay': timedelta(minutes=1),
+    'retries': 0,
+    'retry_delay': timedelta(minutes=0),
     'params': {
         "template":"s7partner",
         "labName": "NA",
