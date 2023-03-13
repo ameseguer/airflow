@@ -32,7 +32,7 @@ default_args = {
     'email': [mail_to],
     'email_on_failure': True,
     'email_on_retry': False,
-    'retries': 1,
+    'retries': 0,
     'retry_delay': timedelta(minutes=1),
     'params': {
         "username": "NA",
