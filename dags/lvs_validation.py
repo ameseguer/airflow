@@ -96,14 +96,14 @@ with DAG('lvs_validation',
         command=f'pytest-3 /home/airflow/tests/eaa/user{lvs_ent_user}/{lvs_script}',
         ssh_conn_id='selenium',
         dag=dag,
-        retries=2,
+        retries=0,
     )
     etp_test = SSHOperator(
         task_id='etp_test',
         command=f'pytest-3 /home/airflow/tests/etp/user{lvs_ent_user}/{lvs_script}',
         ssh_conn_id='selenium',
         dag=dag,
-        retries=2,
+        retries=0,
     )
 
     branch_op >> [dummyPass, dummyFail,
