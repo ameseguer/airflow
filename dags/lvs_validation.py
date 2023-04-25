@@ -33,7 +33,7 @@ default_args = {
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 0,
-    'retry_delay': timedelta(minutes=1),
+    'retry_delay': timedelta(seconds=10),
 }
 
 with DAG('lvs_validation',
